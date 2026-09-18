@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>កម្មវិធីតាមដានការសន្សំប្រាក់ - Khmer Mobile Savings Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            overscroll-behavior-y: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        /* Mobile safe bottom padding for iOS Home Bar */
+        .pb-safe {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex justify-center selection:bg-emerald-500 selection:text-white">
+
+    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl flex flex-col relative pb-24 border-x border-slate-200/60">
+
+        <!-- Mobile Header Navigation Bar -->
+        <header class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 text-white pt-10 pb-6 px-5 rounded-b-[2rem] shadow-md sticky top-0 z-30">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="p-2.5 bg-white/20 rounded-2xl backdrop-blur-md shadow-inner">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-extrabold tracking-tight" id="headerGoalTitle">កាបូបសន្សំប្រាក់</h1>
+                        <p class="text-[11px] text-emerald-100 flex items-center gap-1">
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                            ទិន្នន័យរក្សាទុកស្វ័យប្រវត្តិនៅលើម៉ាស៊ីន
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Settings Modal Trigger -->
+                <button id="openSettingsBtn" class="p-2.5 bg-white/10 hover:bg-white/20 active:scale-95 rounded-2xl text-white backdrop-blur-md transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Target Goal Card Highlight -->
+            <div class="mt-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3.5 text-white flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] text-emerald-100 uppercase tracking-wider font-semibold">គោលដៅសន្សំ:</span>
+                    <div class="text-base font-extrabold" id="dashGoalNameText">ទិញសម្ភារៈប្រើប្រាស់</div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs bg-emerald-400/30 px-2 py-0.5 rounded-full text-emerald-100 font-bold" id="dashTargetDisplay">$100.00</span>
+                    <div class="text-[11px] text-emerald-100 mt-0.5 font-medium" id="dashTargetDisplayKHR">400,000 ៛</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area (Single Page View Tabs) -->
+        <main class="flex-1 px-4 pt-4 space-y-4">
+
+            <!-- TAB 1: Dashboard & Fast Check-in View -->
+            <div id="tabHome" class="space-y-4">
+
+                <!-- Progress Ring / Bar Display -->
+                <div class="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                            🎯 ភាពជោគជ័យ
+                        </span>
+                        <span id="completionBadge" class="font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">0%</span>
+                    </div>
+
+                    <div class="w-full bg-slate-100 rounded-full h-4 p-0.5 shadow-inner overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-1.5 text-[9px] font-bold text-white shadow" style="width: 0%"></div>
+                    </div>
+
+                    <div class="text-center text-[11px] font-semibold text-slate-500" id="progressStatusText">
+                        សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ដើមកត់ត្រា!
+                    </div>
+                </div>
+
+                <!-- Dashboard Summary 3-Grid Metrics -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-emerald-50/80 border border-emerald-100 rounded-2xl p-2.5 text-center">
+                        <p class="text-[10px] text-emerald-600 font-semibold">សន្សំបានសរុប</p>
+                        <p class="text-sm font-black text-emerald-700 mt-0.5" id="dashTotalSavedUSD">$0</p>
+                        <p class="text-[9px] font-bold text-slate-500 truncate" id="dashTotalSavedKHR">0 ៛</p>
+                    </div>
+
+                    <div class="bg-amber-50/80 border border-amber-100 rounded-2xl p-2.5 text-center">
+                        <p class="text-[10px] text-amber-600 font-semibold">ប្រាក់នៅខ្វះ</p>
+                        <p class="text-sm font-black text-amber-600 mt-0.5" id="dashRemainingUSD">$100</p>
+                        <p class="text-[9px] font-bold text-slate-500 truncate" id="dashRemainingKHR">400,000 ៛</p>
+                    </div>
+
+                    <div class="bg-cyan-50/80 border border-cyan-100 rounded-2xl p-2.5 text-center">
+                        <p class="text-[10px] text-cyan-600 font-semibold">រយៈពេលសល់</p>
+                        <p class="text-sm font-extrabold text-cyan-800 mt-0.5" id="dashRemainingTime">10 សប្តាហ៍</p>
+                        <p class="text-[9px] text-slate-500 truncate" id="dashRemainingTimeSub">~ 2.5 ខែ</p>
+                    </div>
+                </div>
+
+                <!-- One-Click Deposit Action Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-4 text-white shadow-lg space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-300 font-medium">⚡ សន្សំលឿនតាមផែនការ</span>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold" id="planFrequencyBadge">រៀងរាល់អាទិត្យ</span>
+                    </div>
+
+                    <button id="quickAddBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <span id="quickAddBtnText">សន្សំ 40,000 ៛ ឥឡូវនេះ</span>
+                    </button>
+                </div>
+
+                <!-- Interactive Checklist grid -->
+                <div class="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5" id="checklistTitle">
+                            <span>✅</span> បញ្ជីរគ្រីសសន្សំប្រចាំសប្តាហ៍
+                        </h3>
+                        <span class="text-[10px] text-slate-400">ចុចលើប្រអប់ដើម្បីគ្រីស</span>
+                    </div>
+
+                    <div id="checklistContainer" class="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- Dynamic Checkbox Cards generated via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: Custom Deposit Entry -->
+            <div id="tabAdd" class="hidden space-y-4">
+                <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-2">
+                        <h3 class="text-sm font-bold text-slate-800">បញ្ចូលចំនួនទឹកប្រាក់សន្សំជាក់ស្តែង</h3>
+                        <p class="text-xs text-slate-500">អ្នកអាចបញ្ចូលចំនួនប្រាក់ខុសពីគម្រោងបានយ៉ាងងាយស្រួល</p>
+                    </div>
+
+                    <form id="customDepositForm" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">ចំនួនទឹកប្រាក់</label>
+                            <div class="flex rounded-2xl shadow-sm">
+                                <input type="number" id="customAmountInput" placeholder="ឧ. 40000 ឬ 50000" min="1" step="any" required class="w-full rounded-l-2xl border-slate-200 border-y border-l focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 px-3.5 py-3 text-sm font-bold text-slate-800">
+                                <select id="customCurrencySelect" class="rounded-r-2xl border-slate-200 border bg-slate-50 px-3 py-3 text-xs font-bold text-slate-700 focus:outline-none border-l-0">
+                                    <option value="KHR" selected>KHR (៛)</option>
+                                    <option value="USD">USD ($)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">កាលបរិច្ឆេទ</label>
+                            <input type="date" id="depositDateInput" class="w-full rounded-2xl border-slate-200 border px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">ចំណាំផ្សេងៗ (មិនបាច់ដាក់ក៏បាន)</label>
+                            <input type="text" id="depositNoteInput" placeholder="ឧ. សន្សំបានច្រើនជាងមុន" class="w-full rounded-2xl border-slate-200 border px-3.5 py-2.5 text-xs text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                        </div>
+
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3 px-4 rounded-2xl text-xs shadow-md transition">
+                            រក្សាទុកការសន្សំ
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 3: History & Log List -->
+            <div id="tabHistory" class="hidden space-y-4">
+                <div class="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                        <h3 class="text-xs font-bold text-slate-800">ប្រវត្តិប្រតិបត្តិការសន្សំប្រាក់</h3>
+                        <span class="text-[11px] font-bold text-emerald-600" id="historyCountBadge">0 ប្រតិបត្តិការ</span>
+                    </div>
+
+                    <div id="historyLogList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- History List items dynamically injected -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Fixed Navigation Tab Bar -->
+        <nav class="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200/80 px-6 py-2 flex justify-between items-center z-40 pb-safe">
+            <button id="navHome" class="flex flex-col items-center gap-1 text-emerald-600 transition active:scale-95">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[10px] font-bold">ទំព័រដើម</span>
+            </button>
+
+            <button id="navAdd" class="flex flex-col items-center gap-1 text-slate-400 transition active:scale-95">
+                <div class="p-2 bg-emerald-500 text-white rounded-2xl shadow-md -mt-5 border-2 border-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                </div>
+                <span class="text-[10px] font-bold text-slate-600">បញ្ចូលប្រាក់</span>
+            </button>
+
+            <button id="navHistory" class="flex flex-col items-center gap-1 text-slate-400 transition active:scale-95">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-[10px] font-bold">ប្រវត្តិ</span>
+            </button>
+        </nav>
+
+        <!-- Settings Slide-over Modal -->
+        <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex justify-center items-end hidden transition-opacity">
+            <div class="w-full max-w-md bg-white rounded-t-[2.5rem] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-extrabold text-slate-800">កំណត់គោលដៅសន្សំប្រាក់</h3>
+                    <button id="closeSettingsBtn" class="text-slate-400 hover:text-slate-600 p-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form id="goalSettingsForm" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">ឈ្មោះវត្ថុ/គោលដៅ (Goal Name)</label>
+                        <input type="text" id="goalNameInput" value="ទិញទូរស័ព្ទថ្មី" required class="w-full rounded-xl border-slate-200 border px-3.5 py-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-200">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">ចំនួនទឹកប្រាក់គោលដៅ</label>
+                            <input type="number" id="targetAmountInput" value="100" min="1" step="any" required class="w-full rounded-xl border-slate-200 border px-3.5 py-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-200">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">រូបិយប័ណ្ណគោលដៅ</label>
+                            <select id="targetCurrencySelect" class="w-full rounded-xl border-slate-200 border px-3.5 py-2.5 font-bold text-slate-800 bg-slate-50">
+                                <option value="USD" selected>USD ($)</option>
+                                <option value="KHR">KHR (៛)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">ភពញឹកញាប់</label>
+                            <select id="savingFrequencySelect" class="w-full rounded-xl border-slate-200 border px-3.5 py-2.5 font-medium text-slate-800 bg-slate-50">
+                                <option value="weekly" selected>ប្រចាំសប្តាហ៍</option>
+                                <option value="daily">ប្រចាំថ្ងៃ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">អត្រាប្តូរប្រាក់ ($1)</label>
+                            <input type="number" id="exchangeRateInput" value="4000" step="50" class="w-full rounded-xl border-slate-200 border px-3.5 py-2.5 font-bold text-slate-800">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label id="plannedAmountLabel" class="block font-semibold text-slate-600 mb-1">គម្រោងសន្សំក្នុងមួយសប្តាហ៍</label>
+                        <div class="flex rounded-xl shadow-sm">
+                            <input type="number" id="plannedAmountInput" value="40000" min="100" step="100" required class="w-full rounded-l-xl border-slate-200 border-y border-l px-3.5 py-2.5 font-bold text-slate-800">
+                            <select id="plannedCurrencySelect" class="rounded-r-xl border-slate-200 border bg-slate-50 px-3 py-2.5 font-bold text-slate-700 border-l-0">
+                                <option value="KHR" selected>KHR (៛)</option>
+                                <option value="USD">USD ($)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex gap-2">
+                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition">
+                            រក្សាទុកការផ្លាស់ប្តូរ
+                        </button>
+                    </div>
+                </form>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button id="resetAllDataBtn" class="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold py-2.5 rounded-xl text-xs transition border border-rose-200">
+                        🗑️ លុបទិន្នន័យទាំងអស់ឡើងវិញ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 opacity-0 transition-all duration-300 ease-out bg-slate-900 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center space-x-2 space-x-reverse z-50 pointer-events-none text-xs w-max">
+            <span id="toastIcon">🎉</span>
+            <span id="toastMessage" class="font-medium">បានរក្សាទុកដោយជោគជ័យ!</span>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic & Persistence -->
+    <script>
+        const LOCAL_STORAGE_KEY = 'khmer_mobile_savings_app_data_v2';
+
+        // Default App State
+        let appState = {
+            goalName: "ទិញទូរស័ព្ទថ្មី",
+            exchangeRate: 4000,
+            targetAmount: 100,
+            targetCurrency: "USD",
+            savingFrequency: "weekly", // "weekly" or "daily"
+            plannedAmount: 40000,
+            plannedCurrency: "KHR",
+            deposits: [] // Array of { id, date, amount, currency, note, isChecklist, checklistIndex }
+        };
+
+        // DOM Elements
+        const headerGoalTitle = document.getElementById('headerGoalTitle');
+        const dashGoalNameText = document.getElementById('dashGoalNameText');
+        const dashTargetDisplay = document.getElementById('dashTargetDisplay');
+        const dashTargetDisplayKHR = document.getElementById('dashTargetDisplayKHR');
+
+        const completionBadge = document.getElementById('completionBadge');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatusText = document.getElementById('progressStatusText');
+
+        const dashTotalSavedUSD = document.getElementById('dashTotalSavedUSD');
+        const dashTotalSavedKHR = document.getElementById('dashTotalSavedKHR');
+        const dashRemainingUSD = document.getElementById('dashRemainingUSD');
+        const dashRemainingKHR = document.getElementById('dashRemainingKHR');
+        const dashRemainingTime = document.getElementById('dashRemainingTime');
+        const dashRemainingTimeSub = document.getElementById('dashRemainingTimeSub');
+
+        const planFrequencyBadge = document.getElementById('planFrequencyBadge');
+        const quickAddBtn = document.getElementById('quickAddBtn');
+        const quickAddBtnText = document.getElementById('quickAddBtnText');
+        const checklistTitle = document.getElementById('checklistTitle');
+        const checklistContainer = document.getElementById('checklistContainer');
+
+        const customDepositForm = document.getElementById('customDepositForm');
+        const customAmountInput = document.getElementById('customAmountInput');
+        const customCurrencySelect = document.getElementById('customCurrencySelect');
+        const depositDateInput = document.getElementById('depositDateInput');
+        const depositNoteInput = document.getElementById('depositNoteInput');
+
+        const historyLogList = document.getElementById('historyLogList');
+        const historyCountBadge = document.getElementById('historyCountBadge');
+
+        // Navigation DOMs
+        const navHome = document.getElementById('navHome');
+        const navAdd = document.getElementById('navAdd');
+        const navHistory = document.getElementById('navHistory');
+        const tabHome = document.getElementById('tabHome');
+        const tabAdd = document.getElementById('tabAdd');
+        const tabHistory = document.getElementById('tabHistory');
+
+        // Settings Modal DOMs
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const goalSettingsForm = document.getElementById('goalSettingsForm');
+        const goalNameInput = document.getElementById('goalNameInput');
+        const targetAmountInput = document.getElementById('targetAmountInput');
+        const targetCurrencySelect = document.getElementById('targetCurrencySelect');
+        const savingFrequencySelect = document.getElementById('savingFrequencySelect');
+        const exchangeRateInput = document.getElementById('exchangeRateInput');
+        const plannedAmountInput = document.getElementById('plannedAmountInput');
+        const plannedCurrencySelect = document.getElementById('plannedCurrencySelect');
+        const plannedAmountLabel = document.getElementById('plannedAmountLabel');
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+
+            // Set default date picker to today
+            depositDateInput.value = new Date().toISOString().split('T')[0];
+
+            // Tab Navigation Event Listeners
+            navHome.addEventListener('click', () => switchTab('home'));
+            navAdd.addEventListener('click', () => switchTab('add'));
+            navHistory.addEventListener('click', () => switchTab('history'));
+
+            // Settings Modal Open/Close
+            openSettingsBtn.addEventListener('click', () => {
+                populateSettingsInputs();
+                settingsModal.classList.remove('hidden');
+            });
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+            // Form Submit Listeners
+            goalSettingsForm.addEventListener('submit', handleSettingsSave);
+            customDepositForm.addEventListener('submit', handleCustomDeposit);
+            quickAddBtn.addEventListener('click', handleQuickAddDeposit);
+            resetAllDataBtn.addEventListener('click', handleResetAllData);
+
+            // Frequency change update label in settings
+            savingFrequencySelect.addEventListener('change', () => {
+                if (savingFrequencySelect.value === 'weekly') {
+                    plannedAmountLabel.innerText = "គម្រោងសន្សំក្នុងមួយសប្តាហ៍";
+                } else {
+                    plannedAmountLabel.innerText = "គម្រោងសន្សំក្នុងមួយថ្ងៃ";
+                }
+            });
+
+            renderApp();
+        });
+
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    appState = { ...appState, ...parsed };
+                } catch (e) {
+                    console.error(" Error loading stored savings data", e);
+                }
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        // Calculations Helpers
+        function convertToUSD(amount, currency) {
+            if (currency === 'USD') return amount;
+            return amount / (appState.exchangeRate || 4000);
+        }
+
+        function convertToKHR(amount, currency) {
+            if (currency === 'KHR') return amount;
+            return amount * (appState.exchangeRate || 4000);
+        }
+
+        function formatKHR(amount) {
+            return Math.round(amount).toLocaleString('en-US') + ' ៛';
+        }
+
+        function formatUSD(amount) {
+            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Navigation Tab Switching
+        function switchTab(tab) {
+            tabHome.classList.add('hidden');
+            tabAdd.classList.add('hidden');
+            tabHistory.classList.add('hidden');
+
+            navHome.className = "flex flex-col items-center gap-1 text-slate-400 transition active:scale-95";
+            navAdd.className = "flex flex-col items-center gap-1 text-slate-400 transition active:scale-95";
+            navHistory.className = "flex flex-col items-center gap-1 text-slate-400 transition active:scale-95";
+
+            if (tab === 'home') {
+                tabHome.classList.remove('hidden');
+                navHome.className = "flex flex-col items-center gap-1 text-emerald-600 transition active:scale-95";
+            } else if (tab === 'add') {
+                tabAdd.classList.remove('hidden');
+                navAdd.className = "flex flex-col items-center gap-1 text-emerald-600 transition active:scale-95";
+            } else if (tab === 'history') {
+                tabHistory.classList.remove('hidden');
+                navHistory.className = "flex flex-col items-center gap-1 text-emerald-600 transition active:scale-95";
+            }
+        }
+
+        function renderApp() {
+            // Header Goal & Target Displays
+            headerGoalTitle.innerText = appState.goalName || "កាបូបសន្សំប្រាក់";
+            dashGoalNameText.innerText = appState.goalName || "ទិញទូរស័ព្ទថ្មី";
+
+            const targetUSD = convertToUSD(appState.targetAmount, appState.targetCurrency);
+            const targetKHR = convertToKHR(appState.targetAmount, appState.targetCurrency);
+            dashTargetDisplay.innerText = formatUSD(targetUSD);
+            dashTargetDisplayKHR.innerText = formatKHR(targetKHR);
+
+            // Totals Saved
+            const totalSavedUSD = appState.deposits.reduce((acc, curr) => acc + convertToUSD(curr.amount, curr.currency), 0);
+            const totalSavedKHR = appState.deposits.reduce((acc, curr) => acc + convertToKHR(curr.amount, curr.currency), 0);
+
+            dashTotalSavedUSD.innerText = formatUSD(totalSavedUSD);
+            dashTotalSavedKHR.innerText = formatKHR(totalSavedKHR);
+
+            // Remaining Needed
+            const remainingUSD = Math.max(0, targetUSD - totalSavedUSD);
+            const remainingKHR = Math.max(0, targetKHR - totalSavedKHR);
+
+            dashRemainingUSD.innerText = formatUSD(remainingUSD);
+            dashRemainingKHR.innerText = formatKHR(remainingKHR);
+
+            // Time estimate calculations
+            const isWeekly = appState.savingFrequency === 'weekly';
+            const unitText = isWeekly ? 'សប្តាហ៍' : 'ថ្ងៃ';
+            const plannedUSD = convertToUSD(appState.plannedAmount, appState.plannedCurrency);
+
+            const totalIntervals = plannedUSD > 0 ? Math.ceil(targetUSD / plannedUSD) : 0;
+            const remainingIntervals = plannedUSD > 0 ? Math.ceil(remainingUSD / plannedUSD) : 0;
+
+            dashRemainingTime.innerText = `${remainingIntervals} ${unitText}`;
+            if (isWeekly) {
+                const monthsLeft = (remainingIntervals / 4.33).toFixed(1);
+                dashRemainingTimeSub.innerText = remainingUSD <= 0 ? 'សម្រេចបានហើយ!' : `~ ${monthsLeft} ខែទៀត`;
+            } else {
+                const monthsLeft = (remainingIntervals / 30).toFixed(1);
+                dashRemainingTimeSub.innerText = remainingUSD <= 0 ? 'សម្រេចបានហើយ!' : `~ ${monthsLeft} ខែទៀត`;
+            }
+
+            // Progress Bar Update
+            let progressPct = targetUSD > 0 ? (totalSavedUSD / targetUSD) * 100 : 0;
+            if (progressPct > 100) progressPct = 100;
+
+            completionBadge.innerText = `${progressPct.toFixed(1)}%`;
+            progressBar.style.width = `${progressPct}%`;
+            progressBar.innerText = progressPct >= 10 ? `${progressPct.toFixed(0)}%` : '';
+
+            if (progressPct >= 100) {
+                progressStatusText.innerText = "🎉 អបអរសាទរ! អ្នកបានសម្រេចគោលដៅហើយ!";
+                progressStatusText.className = "text-center text-xs font-extrabold text-emerald-600 animate-bounce";
+            } else if (progressPct >= 50) {
+                progressStatusText.innerText = "ខិតខំបន្តទៀត! អ្នកដើរបានពាក់កណ្តាលផ្លូវហើយ";
+                progressStatusText.className = "text-center text-xs font-bold text-teal-600";
+            } else {
+                progressStatusText.innerText = "រក្សាការសន្សំជាប្រចាំដើម្បីសម្រេចគោលដៅ!";
+                progressStatusText.className = "text-center text-[11px] font-semibold text-slate-500";
+            }
+
+            // Quick Deposit Button Text
+            const plannedFormatted = appState.plannedCurrency === 'KHR' ? formatKHR(appState.plannedAmount) : formatUSD(appState.plannedAmount);
+            planFrequencyBadge.innerText = isWeekly ? 'រៀងរាល់អាទិត្យ' : 'រៀងរាល់ថ្ងៃ';
+            quickAddBtnText.innerText = `សន្សំ ${plannedFormatted} ឥឡូវនេះ`;
+
+            // Checklist & History Render
+            renderChecklist(totalIntervals, isWeekly, plannedFormatted);
+            renderHistoryList();
+        }
+
+        function renderChecklist(totalCount, isWeekly, plannedFormatted) {
+            checklistTitle.innerHTML = isWeekly ? '<span>✅</span> បញ្ជីរគ្រីសសន្សំប្រចាំសប្តាហ៍' : '<span>✅</span> បញ្ជីរគ្រីសសន្សំប្រចាំថ្ងៃ';
+            checklistContainer.innerHTML = '';
+
+            if (totalCount <= 0) {
+                checklistContainer.innerHTML = '<p class="text-xs text-slate-400 col-span-2 text-center py-4">សូមបញ្ចូលប្រាក់គោលដៅនៅក្នុង Setting</p>';
+                return;
+            }
+
+            const countToDisplay = Math.min(totalCount, 80);
+
+            for (let i = 1; i <= countToDisplay; i++) {
+                const depositMatch = appState.deposits.find(d => d.checklistIndex === i);
+                const isChecked = !!depositMatch;
+
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-2xl border text-xs transition active:scale-95 flex items-center justify-between cursor-pointer ${
+                    isChecked 
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-900 shadow-xs' 
+                    : 'bg-slate-50 border-slate-200/80 text-slate-700'
+                }`;
+
+                const unitLabel = isWeekly ? `អាទិត្យទី ${i}` : `ថ្ងៃទី ${i}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                        <div>
+                            <span class="font-bold block ${isChecked ? 'line-through text-emerald-700' : ''}">${unitLabel}</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">${plannedFormatted}</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleChecklistItem(i, isChecked);
+                });
+
+                checklistContainer.appendChild(card);
+            }
+        }
+
+        function toggleChecklistItem(index, isChecked) {
+            if (isChecked) {
+                appState.deposits = appState.deposits.filter(d => d.checklistIndex !== index);
+                showToast("បានដកចេញពីបញ្ជីសន្សំ", "ℹ️");
+            } else {
+                const newDep = {
+                    id: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    amount: appState.plannedAmount,
+                    currency: appState.plannedCurrency,
+                    note: appState.savingFrequency === 'weekly' ? `សន្សំសប្តាហ៍ទី ${index}` : `សន្សំថ្ងៃទី ${index}`,
+                    isChecklist: true,
+                    checklistIndex: index
+                };
+                appState.deposits.push(newDep);
+                showToast("សន្សំបានជោគជ័យ!", "🎉");
+                triggerConfettiIfCompleted();
+            }
+
+            saveToLocalStorage();
+            renderApp();
+        }
+
+        function renderHistoryList() {
+            historyLogList.innerHTML = '';
+            historyCountBadge.innerText = `${appState.deposits.length} ប្រតិបត្តិការ`;
+
+            if (appState.deposits.length === 0) {
+                historyLogList.innerHTML = `
+                    <div class="text-center py-8 text-slate-400 text-xs">
+                        មិនទាន់មានប្រវត្តិសន្សំប្រាក់នៅឡើយទេ
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = [...appState.deposits].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+
+            sorted.forEach(dep => {
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50/60";
+
+                const displayAmt = dep.currency === 'KHR' ? formatKHR(dep.amount) : formatUSD(dep.amount);
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2.5 space-x-reverse">
+                        <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-800">${dep.note || 'សន្សំប្រាក់'}</div>
+                            <div class="text-[10px] text-slate-400 font-medium">${dep.date}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xs font-black text-emerald-600">+${displayAmt}</span>
+                        <button onclick="deleteDeposit(${dep.id})" class="text-slate-300 hover:text-rose-500 p-1 transition" title="លុប">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+
+                historyLogList.appendChild(item);
+            });
+        }
+
+        // Quick Deposit Action
+        function handleQuickAddDeposit() {
+            let nextIndex = 1;
+            while (appState.deposits.some(d => d.checklistIndex === nextIndex)) {
+                nextIndex++;
+            }
+
+            const newDep = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                amount: appState.plannedAmount,
+                currency: appState.plannedCurrency,
+                note: appState.savingFrequency === 'weekly' ? `សន្សំសប្តាហ៍ទី ${nextIndex}` : `សន្សំថ្ងៃទី ${nextIndex}`,
+                isChecklist: true,
+                checklistIndex: nextIndex
+            };
+
+            appState.deposits.push(newDep);
+            saveToLocalStorage();
+            renderApp();
+            showToast("បានកត់ត្រាការសន្សំប្រាក់!", "🎉");
+            triggerConfettiIfCompleted();
+        }
+
+        // Custom Deposit Entry
+        function handleCustomDeposit(e) {
+            e.preventDefault();
+
+            const amount = parseFloat(customAmountInput.value);
+            const currency = customCurrencySelect.value;
+            const date = depositDateInput.value || new Date().toISOString().split('T')[0];
+            const note = depositNoteInput.value.trim() || 'សន្សំប្រាក់';
+
+            if (!amount || amount <= 0) return;
+
+            const newDep = {
+                id: Date.now(),
+                date: date,
+                amount: amount,
+                currency: currency,
+                note: note,
+                isChecklist: false
+            };
+
+            appState.deposits.push(newDep);
+            saveToLocalStorage();
+
+            customAmountInput.value = '';
+            depositNoteInput.value = '';
+
+            switchTab('home');
+            renderApp();
+            showToast("រក្សាទុកប្រាក់សន្សំបានជោគជ័យ!", "✅");
+            triggerConfettiIfCompleted();
+        }
+
+        window.deleteDeposit = function(id) {
+            appState.deposits = appState.deposits.filter(d => d.id !== id);
+            saveToLocalStorage();
+            renderApp();
+            showToast("បានលុបប្រតិបត្តិការ!", "🗑️");
+        };
+
+        // Populate settings input forms
+        function populateSettingsInputs() {
+            goalNameInput.value = appState.goalName || '';
+            targetAmountInput.value = appState.targetAmount || 100;
+            targetCurrencySelect.value = appState.targetCurrency || 'USD';
+            savingFrequencySelect.value = appState.savingFrequency || 'weekly';
+            exchangeRateInput.value = appState.exchangeRate || 4000;
+            plannedAmountInput.value = appState.plannedAmount || 40000;
+            plannedCurrencySelect.value = appState.plannedCurrency || 'KHR';
+        }
+
+        function handleSettingsSave(e) {
+            e.preventDefault();
+
+            appState.goalName = goalNameInput.value.trim() || "កាបូបសន្សំប្រាក់";
+            appState.targetAmount = parseFloat(targetAmountInput.value) || 0;
+            appState.targetCurrency = targetCurrencySelect.value;
+            appState.savingFrequency = savingFrequencySelect.value;
+            appState.exchangeRate = parseFloat(exchangeRateInput.value) || 4000;
+            appState.plannedAmount = parseFloat(plannedAmountInput.value) || 0;
+            appState.plannedCurrency = plannedCurrencySelect.value;
+
+            saveToLocalStorage();
+            settingsModal.classList.add('hidden');
+            renderApp();
+            showToast("បានផ្លាស់ប្តូរការកំណត់!", "⚙️");
+        }
+
+        function handleResetAllData() {
+            if (confirm("តើអ្នកពិតជាចង់លុបទិន្នន័យទាំងអស់ឡើងវិញមែនទេ? (ទិន្នន័យនឹងត្រូវបាត់បង់ទាំងស្រុង)")) {
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                appState.deposits = [];
+                saveToLocalStorage();
+                settingsModal.classList.add('hidden');
+                renderApp();
+                showToast("បានកំណត់ឡើងវិញរួចរាល់", "🔄");
+            }
+        }
+
+        function showToast(msg, icon = "🎉") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            document.getElementById('toastIcon').innerText = icon;
+
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        function triggerConfettiIfCompleted() {
+            const targetUSD = convertToUSD(appState.targetAmount, appState.targetCurrency);
+            const totalSavedUSD = appState.deposits.reduce((acc, curr) => acc + convertToUSD(curr.amount, curr.currency), 0);
+
+            if (totalSavedUSD >= targetUSD && targetUSD > 0) {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 120,
+                        spread: 80,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
